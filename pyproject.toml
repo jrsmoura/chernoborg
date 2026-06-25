@@ -1,0 +1,13 @@
+[project]
+name = "chernoborg"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    # ADK 2.0 quebrou a API de agentes -> fixado em 1.x
+    "google-adk>=1.0.0,<2.0.0",   # framework do agente + CLI `adk web`
+    "anthropic[bedrock]>=0.40.0", # SDK Anthropic com transporte AWS Bedrock
+    "boto3>=1.28.0",              # cliente AWS (Bedrock Runtime + credenciais)
+    "faiss-cpu>=1.8.0",           # índice vetorial local
+    "pydantic>=2.0",              # contratos do pipeline de ingestão
+    "numpy>=1.26",
+]

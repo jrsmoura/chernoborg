@@ -1,0 +1,28 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+data/
+
+# Node
+frontend/node_modules/
+frontend/.next/
+
+# Secrets / env
+.env
+.env.*
+
+# Git / IDE
+.git/
+.gitignore
+.idea/
+.vscode/
+
+# Docker files themselves
+Dockerfile*
+docker-compose*.yml
+
+# Logs
+*.log

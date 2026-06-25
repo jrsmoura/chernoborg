@@ -1,0 +1,13 @@
+# Runtime do agente. LLM e embeddings via AWS Bedrock; ADK 2.0 quebrou a API.
+google-adk>=1.0.0,<2.0.0
+anthropic[bedrock]>=0.40.0
+boto3>=1.28.0
+faiss-cpu>=1.8.0
+pydantic>=2.0
+numpy>=1.26
+
+# --- Opcionais (NÃO entram na imagem por padrão) ---
+# Embeddings 100% locais (ONNX, sem torch) — ative se quiser zero dependência de API:
+#   pip install fastembed
+# Build do índice precisa do poppler no sistema (pdftotext/pdftoppm):
+#   Debian/Ubuntu: apt-get install -y poppler-utils

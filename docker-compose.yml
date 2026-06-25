@@ -1,0 +1,22 @@
+services:
+  app:
+    build: .
+    # For AWS deployment, replace `build:` with:
+    #   image: <account>.dkr.ecr.<region>.amazonaws.com/assistente-iesb:latest
+    image: assistente-iesb:latest
+    ports:
+      - "80:3000"
+    environment:
+      # For local dev: set these in a .env file or export before running.
+      # For AWS ECS/EB with an IAM role: leave all three empty — boto3 uses
+      # the instance metadata service automatically.
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3000', r => process.exit(r.statusCode < 400 ? 0 : 1))\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
