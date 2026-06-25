@@ -15,11 +15,13 @@ heurística para qualquer reprocessamento futuro.
 from __future__ import annotations
 
 import re
+import unicodedata
 
 # Faixas de páginas (inclusivas, 1-based) consideradas conteúdo útil.
 KEEP_RANGES: dict[str, list[tuple[int, int]]] = {
     "Guia_da_Extensao_Curricular.pdf": [(11, 36)],
     "Guia_de_Atividades_Complementares_Atualizado_10_02_2026.pdf": [(2, 22)],
+    "Guia de Curricularização da Extensão_vf.pdf": [(10, 45)],
 }
 
 # Padrões típicos das páginas de planner/diário e formulários em branco.
@@ -35,7 +37,10 @@ _FILLER_PATTERNS = (
 
 def is_kept(source: str, page: int) -> bool:
     """True se a página estiver em uma faixa curada para indexação."""
-    return any(lo <= page <= hi for lo, hi in KEEP_RANGES.get(source, []))
+    # Normalize to NFC so filenames from NFD filesystems (macOS, some Linux)
+    # match the NFC keys written in this file.
+    key = unicodedata.normalize("NFC", source)
+    return any(lo <= page <= hi for lo, hi in KEEP_RANGES.get(key, []))
 
 
 def looks_like_filler(text: str, *, min_chars: int = 60) -> bool:

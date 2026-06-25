@@ -44,9 +44,10 @@ COPY ingest/           ingest/
 COPY assistente_iesb/  assistente_iesb/
 COPY index/            index/
 
-# Next.js standalone server + static assets
+# Next.js standalone server + static assets + public files (images, favicon…)
 COPY --from=frontend-builder /frontend/.next/standalone/   ./frontend/
 COPY --from=frontend-builder /frontend/.next/static/       ./frontend/.next/static/
+COPY --from=frontend-builder /frontend/public/             ./frontend/public/
 
 # Process manager config
 COPY supervisord.conf /etc/supervisor/supervisord.conf

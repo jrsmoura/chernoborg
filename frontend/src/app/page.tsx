@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState, useRef, useEffect, useCallback } from 'react';
 
 interface Message {
@@ -46,9 +47,7 @@ export default function ChatPage() {
         body: JSON.stringify({ sessionId, message: text, userId }),
       });
       const data = await res.json() as { sessionId?: string; text?: string; error?: string };
-
       if (!res.ok || data.error) throw new Error(data.error ?? 'Erro desconhecido');
-
       if (data.sessionId) setSessionId(data.sessionId);
       setMessages(prev => [...prev, { id: uid(), role: 'assistant', text: data.text ?? '' }]);
     } catch (err) {
@@ -71,48 +70,55 @@ export default function ChatPage() {
 
   return (
     <div id="chat-layout">
-      {/* Header */}
+
+      {/* ── Header ── */}
       <header id="chat-header">
-        <div className="d-flex align-items-center gap-3">
-          <div
-            style={{
-              width: 44, height: 44, borderRadius: '50%',
-              background: 'rgba(255,255,255,0.15)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '1.4rem',
-            }}
-          >
-            🎓
-          </div>
-          <div>
-            <div className="fw-bold fs-5 lh-1">Assistente IESB</div>
-            <div style={{ fontSize: '0.8rem', opacity: 0.75, marginTop: 2 }}>
-              Extensão Curricularizada &amp; Atividades Complementares
-            </div>
-          </div>
+        <Image
+          src="/iesb-logo.png"
+          alt="IESB Centro Universitário"
+          width={46}
+          height={52}
+          className="header-logo"
+          priority
+        />
+        <div className="header-divider" />
+        <div className="header-text">
+          <h1>IA IESB</h1>
+          <p>Conte comigo para sanar suas dúvidas.</p>
         </div>
       </header>
 
-      {/* Messages */}
+      {/* ── Messages ── */}
       <main id="chat-messages">
         {messages.map(msg => (
-          <div key={msg.id} className={`msg-row ${msg.role === 'user' ? 'user' : ''}`}>
+          <div key={msg.id} className={`msg-row ${msg.role === 'user' ? 'user' : 'bot'}`}>
+
             {msg.role === 'assistant' && (
-              <div className="avatar bot">🎓</div>
+              <div className="avatar">
+                <Image src="/iesb-logo.png" alt="IESB" width={36} height={36} />
+              </div>
             )}
+
             <div className={`bubble ${msg.role === 'user' ? 'user' : 'bot'}`}>
               {msg.text}
             </div>
+
             {msg.role === 'user' && (
-              <div className="avatar user">👤</div>
+              <div className="avatar user">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.029 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/>
+                </svg>
+              </div>
             )}
           </div>
         ))}
 
         {loading && (
-          <div className="msg-row">
-            <div className="avatar bot">🎓</div>
-            <div className="bubble bot" style={{ padding: '0.75rem 1rem' }}>
+          <div className="msg-row bot">
+            <div className="avatar">
+              <Image src="/iesb-logo.png" alt="IESB" width={36} height={36} />
+            </div>
+            <div className="bubble bot">
               <div className="typing-dots">
                 <span /><span /><span />
               </div>
@@ -123,14 +129,14 @@ export default function ChatPage() {
         <div ref={bottomRef} />
       </main>
 
-      {/* Input */}
+      {/* ── Footer ── */}
       <footer id="chat-footer">
-        <div className="d-flex align-items-end gap-2">
+        <div className="input-row">
           <textarea
             ref={textareaRef}
             id="chat-input"
             rows={1}
-            placeholder="Escreva sua dúvida... (Enter para enviar)"
+            placeholder="Escreva sua dúvida… (Enter para enviar)"
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={onKeyDown}
@@ -142,11 +148,12 @@ export default function ChatPage() {
             </svg>
           </button>
         </div>
-        <div className="text-muted text-center mt-2" style={{ fontSize: '0.72rem' }}>
-          As respostas são baseadas nos guias oficiais do IESB. Para dúvidas não cobertas, entre em contato com{' '}
-          <a href="mailto:ativ.complementar@iesb.br" className="text-muted">ativ.complementar@iesb.br</a>.
-        </div>
+        <p className="footer-note">
+          Respostas baseadas nos guias oficiais do IESB. Dúvidas não cobertas:{' '}
+          <a href="mailto:ativ.complementar@iesb.br">ativ.complementar@iesb.br</a>
+        </p>
       </footer>
+
     </div>
   );
 }
