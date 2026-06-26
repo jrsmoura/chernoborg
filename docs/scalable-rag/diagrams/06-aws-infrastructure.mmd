@@ -1,0 +1,89 @@
+flowchart TD
+    INTERNET["Internet"]
+    R53["Route 53
+    assistente.iesb.br
+    ALIAS → ALB"]
+    ACM["ACM
+    Certificado SSL
+    *.iesb.br"]
+
+    subgraph REGION["AWS  us-east-1"]
+        subgraph VPC["VPC  10.0.0.0/16"]
+
+            subgraph PUBLIC["Subnets Públicas"]
+                subgraph PUB_A["us-east-1a  10.0.1.0/24"]
+                    ALB_A["ALB Node"]
+                    NAT_A["NAT Gateway"]
+                end
+                subgraph PUB_B["us-east-1b  10.0.2.0/24"]
+                    ALB_B["ALB Node"]
+                    NAT_B["NAT Gateway (standby)"]
+                end
+            end
+
+            IGW["Internet Gateway"]
+
+            subgraph PRIVATE["Subnets Privadas"]
+                subgraph PRI_A["us-east-1a  10.0.10.0/24"]
+                    EKS_A["EKS Nodes
+                    t3.medium
+                    frontend + backend-api pods"]
+                    RDS_A["RDS Primary
+                    PostgreSQL 16 + pgvector
+                    db.t3.medium"]
+                end
+                subgraph PRI_B["us-east-1b  10.0.11.0/24"]
+                    EKS_B["EKS Nodes
+                    t3.medium
+                    ingest-job pods"]
+                    RDS_B["RDS Standby
+                    Multi-AZ replica
+                    failover automático"]
+                end
+            end
+
+            SG_ALB["sg-alb
+            Ingress: 0.0.0.0/0 → 443, 80
+            Egress: sg-eks → 30000-32767"]
+            SG_EKS["sg-eks-nodes
+            Ingress: sg-alb → 30000-32767
+            Egress: 0.0.0.0/0 (via NAT)"]
+            SG_RDS["sg-rds
+            Ingress: sg-eks-nodes → 5432
+            Egress: nenhum"]
+        end
+
+        subgraph SERVICES["Serviços Regionais"]
+            ECR["ECR
+            Private Registry
+            frontend  backend-api  ingest-job"]
+            S3["S3  iesb-corpus
+            PDFs  versionamento  SSE-S3"]
+            SM["Secrets Manager
+            iesb/db-url
+            rotação automática"]
+            BED["AWS Bedrock
+            Claude Haiku 4.5
+            Titan Embeddings v2
+            endpoint regional privado"]
+            CW["CloudWatch
+            Log Groups por namespace
+            Dashboards  Alarms  Insights"]
+        end
+    end
+
+    INTERNET --> R53
+    R53 --> ALB_A & ALB_B
+    ACM -.->|"TLS termination"| ALB_A & ALB_B
+    ALB_A & ALB_B --> IGW
+    IGW --> PUBLIC
+    EKS_A & EKS_B -->|"saída via"| NAT_A
+    NAT_A -->|"failover"| NAT_B
+    NAT_A --> IGW
+    EKS_A & EKS_B --> RDS_A
+    RDS_A -.->|"replicação síncrona"| RDS_B
+    EKS_A & EKS_B -.->|"VPC endpoint recomendado"| BED
+    EKS_A & EKS_B -.->|"VPC endpoint recomendado"| S3
+    EKS_A & EKS_B -.->|"VPC endpoint recomendado"| ECR
+    EKS_A & EKS_B -.->|"VPC endpoint recomendado"| SM
+    EKS_A & EKS_B -->|"logs + métricas"| CW

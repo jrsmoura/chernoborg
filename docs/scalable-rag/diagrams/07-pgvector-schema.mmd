@@ -1,0 +1,45 @@
+erDiagram
+    documents {
+        uuid id PK "gerado pelo job"
+        text filename "nome do arquivo PDF"
+        text s3_key "s3://iesb-corpus/pdfs/..."
+        int total_pages "total de páginas do PDF"
+        int indexed_pages "páginas efetivamente indexadas"
+        text status "pending | indexing | done | error"
+        timestamptz indexed_at "última indexação bem-sucedida"
+        timestamptz created_at "primeira inserção"
+    }
+
+    chunks {
+        bigint id PK "SHA-1 de source|page|ordinal"
+        uuid document_id FK "referência a documents.id"
+        int page "página de origem (1-based)"
+        text section "título inferido da seção"
+        text text "conteúdo do chunk (≤ 1400 chars)"
+        vector embedding "Titan v2 — 1024 dims, L2 normalizado"
+        timestamptz created_at "timestamp de inserção"
+    }
+
+    sessions {
+        uuid id PK "gerado pelo frontend"
+        text user_id "ID anônimo do usuário"
+        jsonb history "array de mensagens [{role, text}]"
+        timestamptz created_at "início da sessão"
+        timestamptz updated_at "última mensagem recebida"
+    }
+
+    ingest_runs {
+        uuid id PK "ID da execução do job"
+        uuid document_id FK "PDF processado"
+        text job_name "nome do Kubernetes Job"
+        int chunks_upserted "chunks gravados nesta execução"
+        int pages_processed "páginas processadas"
+        float duration_seconds "duração total do job"
+        text status "success | error"
+        text error_message "stacktrace em caso de erro"
+        timestamptz started_at "início da execução"
+        timestamptz finished_at "fim da execução"
+    }
+
+    documents ||--o{ chunks : "possui"
+    documents ||--o{ ingest_runs : "rastreia"

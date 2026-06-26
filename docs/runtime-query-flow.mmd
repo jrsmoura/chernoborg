@@ -1,0 +1,41 @@
+flowchart TD
+    Browser["🌐 Navegador\nHTTP porta 80"]
+
+    subgraph DOCKER["Docker Container · assistente-iesb:latest"]
+        subgraph NEXTJS["Next.js · 0.0.0.0:3000"]
+            UI["page.tsx\nChat UI"]
+            PROXY["api/chat/route.ts\nProxy + gerência de sessão"]
+        end
+
+        subgraph ADK["ADK Web Server · 127.0.0.1:8000"]
+            AGENT["LlmAgent\nassistente_iesb"]
+            TOOL["buscar_nos_guias\nTool RAG"]
+            EMB["BedrockEmbedder\nembed_query()"]
+            FAISS["FaissStore\n.search(k=4)"]
+            CHUNKS["Chunks relevantes"]
+            LLM["_BedrockClaude\ngera resposta"]
+        end
+
+        SUPER["supervisord\ngerencia ADK + Next.js"]
+    end
+
+    subgraph BEDROCK["AWS Bedrock · us-east-1"]
+        CLAUDE["Claude Haiku 4.5"]
+        TITAN["Titan Embeddings v2"]
+    end
+
+    Browser -->|"HTTP POST /api/chat"| PROXY
+    UI --> PROXY
+    PROXY -->|"POST /run"| AGENT
+    AGENT --> TOOL
+    TOOL --> EMB
+    EMB -->|"InvokeModel"| TITAN
+    TITAN --> EMB
+    EMB --> FAISS
+    FAISS --> CHUNKS
+    CHUNKS --> LLM
+    LLM -->|"Messages API"| CLAUDE
+    CLAUDE --> LLM
+    LLM --> AGENT
+    AGENT --> PROXY
+    PROXY --> Browser

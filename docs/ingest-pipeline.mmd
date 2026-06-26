@@ -1,0 +1,37 @@
+flowchart TD
+    PDF1["📄 Guia_de_Atividades_Complementares\n_Atualizado_10_02_2026.pdf"]
+    PDF2["📄 Guia_de_Curricularização\n_da_Extensao_vf.pdf"]
+
+    subgraph MANIFEST["ingest/manifest.py"]
+        M["Filtra páginas por PDF\nFaixas curadas + heurística looks_like_filler"]
+    end
+
+    subgraph EXTRACT["ingest/extract.py"]
+        E["PdftotextLayoutExtractor\npdftotext -layout, uma página por vez\n→ lista de RawPage"]
+    end
+
+    subgraph CHUNK["ingest/chunk.py"]
+        C["Chunk por página inteira\nPáginas longas: janelas com sobreposição\nmax 1400 chars · overlap 150\nInferência de seção pelo primeiro título"]
+    end
+
+    subgraph EMBED["ingest/embed.py"]
+        EM["BedrockEmbedder\nAmazon Titan Embeddings v2\n1024 dims · normalizado L2\nvia boto3 / AWS Bedrock Runtime"]
+    end
+
+    subgraph STORE["ingest/store.py"]
+        S["FaissStore.build()\nIndexFlatIP\nproduto interno = cosseno entre vetores unitários"]
+    end
+
+    subgraph INDEX["index/"]
+        F["index.faiss\nvetores de embedding (1024-dim)"]
+        J["chunks.jsonl\ndocstore: texto, fonte, página, seção"]
+    end
+
+    PDF1 --> MANIFEST
+    PDF2 --> MANIFEST
+    MANIFEST --> EXTRACT
+    EXTRACT --> CHUNK
+    CHUNK --> EMBED
+    EMBED --> STORE
+    STORE --> F
+    STORE --> J

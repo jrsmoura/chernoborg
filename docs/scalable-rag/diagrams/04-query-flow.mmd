@@ -1,0 +1,33 @@
+sequenceDiagram
+    actor Aluno
+    participant FE as Frontend<br/>Next.js :3000
+    participant BE as Backend API<br/>ADK Agent :8000
+    participant PG as PgVector<br/>RDS PostgreSQL
+    participant TIT as Titan Embeddings v2<br/>AWS Bedrock
+    participant CL as Claude Haiku 4.5<br/>AWS Bedrock
+
+    Aluno->>FE: digita mensagem e envia
+
+    FE->>FE: verifica session_id<br/>(cria se primeira mensagem)
+
+    FE->>BE: POST /run<br/>{ app_name, user_id, session_id, message }
+
+    BE->>BE: LlmAgent recebe turno<br/>decide invocar tool
+
+    BE->>TIT: InvokeModel<br/>{ inputText: query, dimensions: 1024, normalize: true }
+    TIT-->>BE: embedding float32[1024]
+
+    BE->>PG: SELECT id, source, page, section, text,<br/>1-(embedding<=>$1) AS similarity<br/>FROM chunks ORDER BY embedding<=>$1 LIMIT 4
+    PG-->>BE: top-4 chunks com score de similaridade
+
+    BE->>BE: formata contexto RAG<br/>chunks + metadados de fonte
+
+    BE->>CL: Messages API<br/>system: prompt.py<br/>user: contexto + pergunta original
+    CL-->>BE: resposta gerada em português
+
+    BE->>PG: UPDATE sessions SET history=..., updated_at=now()<br/>WHERE id=$session_id
+    PG-->>BE: ok
+
+    BE-->>FE: { session_id, text: resposta }
+
+    FE-->>Aluno: exibe bolha de resposta na UI

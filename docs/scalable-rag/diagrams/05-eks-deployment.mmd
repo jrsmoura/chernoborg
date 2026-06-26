@@ -1,0 +1,119 @@
+flowchart TD
+    INTERNET["Internet"]
+
+    subgraph AWS["AWS  us-east-1"]
+        ALB["Application Load Balancer
+        HTTPS 443  HTTP 301→HTTPS
+        AWS Load Balancer Controller"]
+
+        subgraph EKS["Amazon EKS Cluster"]
+            direction TB
+
+            subgraph NS_PROD["Namespace: iesb-prod"]
+                direction LR
+
+                subgraph FE_SET["frontend"]
+                    FE_DEP["Deployment
+                    image: ecr/.../frontend:sha
+                    replicas: 2
+                    resources: 100m/128Mi → 500m/512Mi"]
+                    FE_HPA["HPA
+                    minReplicas: 2
+                    maxReplicas: 10
+                    target CPU: 70%"]
+                    FE_SVC["Service ClusterIP
+                    port: 3000"]
+                    FE_CM["ConfigMap
+                    ADK_BASE_URL=http://backend-api:8000"]
+                end
+
+                subgraph BE_SET["backend-api"]
+                    BE_DEP["Deployment
+                    image: ecr/.../backend-api:sha
+                    replicas: 2
+                    resources: 200m/256Mi → 1000m/1Gi"]
+                    BE_HPA["HPA
+                    minReplicas: 2
+                    maxReplicas: 10
+                    target CPU: 70%"]
+                    BE_SVC["Service ClusterIP
+                    port: 8000"]
+                    BE_SA["ServiceAccount
+                    IRSA: iesb-backend-api
+                    bedrock:InvokeModel
+                    secretsmanager:GetSecretValue"]
+                    BE_ES["ExternalSecret
+                    → Secrets Manager: iesb/db-url
+                    → Secret: DB_URL"]
+                end
+            end
+
+            subgraph NS_JOBS["Namespace: iesb-jobs"]
+                INGEST["CronJob: ingest-job
+                image: ecr/.../ingest-job:sha
+                schedule: on-demand
+                resources: 500m/512Mi → 2000m/2Gi
+                IRSA: iesb-ingest-job
+                s3:GetObject  s3:ListBucket
+                bedrock:InvokeModel
+                secretsmanager:GetSecretValue"]
+            end
+
+            subgraph NS_MON["Namespace: monitoring"]
+                PROM["Prometheus
+                scrape: pods com
+                annotations prometheus.io/scrape"]
+                GRAF["Grafana
+                dashboards: infra + app metrics"]
+            end
+
+            INGRESS["Ingress  ALB
+            /        → frontend-svc:3000
+            /api     → frontend-svc:3000
+            tls: acm-cert-arn"]
+        end
+
+        subgraph DATA["Dados"]
+            RDS["RDS PostgreSQL 16
+            db.t3.medium  Multi-AZ
+            extensão pgvector
+            SG: sg-rds  porta 5432"]
+            S3B["S3  iesb-corpus
+            PDFs originais
+            versionamento ativo"]
+            SM["Secrets Manager
+            iesb/db-url → DB_URL"]
+        end
+
+        subgraph PLATFORM["Plataforma"]
+            ECR["ECR
+            frontend
+            backend-api
+            ingest-job"]
+            BED["AWS Bedrock
+            Claude Haiku 4.5
+            Titan Embeddings v2"]
+            CW["CloudWatch
+            Logs + Metrics + Alarms"]
+        end
+    end
+
+    INTERNET -->|"HTTPS 443"| ALB
+    ALB --> INGRESS
+    INGRESS --> FE_SVC
+    FE_SVC --> BE_SVC
+    BE_SVC --> RDS
+    BE_SVC --> BED
+    INGEST --> S3B
+    INGEST --> RDS
+    INGEST --> BED
+    ECR -.->|"imagePullPolicy: Always"| FE_DEP
+    ECR -.->|"imagePullPolicy: Always"| BE_DEP
+    ECR -.->|"imagePullPolicy: Always"| INGEST
+    SM -.->|"ExternalSecret sync"| BE_ES
+    BE_ES -.-> BE_DEP
+    FE_DEP --- FE_HPA
+    BE_DEP --- BE_HPA
+    NS_PROD -.->|"scrape metrics"| PROM
+    PROM --> GRAF
+    EKS -.->|"container logs"| CW

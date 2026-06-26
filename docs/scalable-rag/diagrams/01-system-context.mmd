@@ -1,0 +1,37 @@
+flowchart TD
+    STUDENT["Aluno IESB
+    Faz perguntas sobre
+    Extensão Curricularizada
+    e Atividades Complementares"]
+
+    ADMIN["Administrador IESB
+    Atualiza PDFs,
+    monitora indexação"]
+
+    subgraph SYSTEM["IA IESB — Assistente Virtual RAG"]
+        direction TB
+        FE["Frontend
+        Next.js 15"]
+        BE["Backend API
+        Agente RAG (ADK)"]
+        PIPE["Data Pipeline
+        Ingestão de PDFs"]
+        VDB["Vector Database
+        PgVector (RDS)"]
+    end
+
+    S3["Amazon S3
+    Armazenamento de PDFs"]
+
+    BEDROCK["AWS Bedrock  us-east-1
+    Claude Haiku 4.5 — geração de texto
+    Titan Embeddings v2 — vetorização"]
+
+    STUDENT -->|"Dúvidas via chat"| FE
+    FE -->|"Requisição de resposta"| BE
+    BE -->|"Busca semântica k=4"| VDB
+    BE -->|"Embed query + gera resposta"| BEDROCK
+    ADMIN -->|"Upload de PDFs"| S3
+    S3 -->|"Trigger de ingestão"| PIPE
+    PIPE -->|"Chunks + embeddings"| VDB
+    PIPE -->|"Vetorização dos chunks"| BEDROCK

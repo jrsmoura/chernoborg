@@ -1,0 +1,78 @@
+flowchart TD
+    subgraph ORIGEM["Origem"]
+        S3["S3  iesb-corpus/pdfs/
+        Guia_de_Atividades_Complementares.pdf
+        Guia_de_Curricularizacao_da_Extensao_vf.pdf"]
+        SQS["SQS  iesb-ingest-queue
+        mensagem com s3_key do PDF
+        (modo event-driven)"]
+    end
+
+    TRIGGER["Gatilho
+    kubectl create job
+    ou S3 Event Notification
+    ou CronJob agendado"]
+
+    subgraph JOB["EKS Job — ingest-job"]
+        direction TB
+
+        DL["1  Download PDF do S3
+        para /tmp/  via boto3"]
+
+        MANIFEST["2  manifest.py
+        Filtra páginas por faixa curada
+        KEEP_RANGES por PDF
+        heurística looks_like_filler"]
+
+        EXTRACT["3  extract.py
+        PdftotextLayoutExtractor
+        pdftotext -layout página por página
+        → lista de RawPage"]
+
+        CHUNK["4  chunk.py
+        Chunk por página inteira
+        Páginas longas: janelas sobrepostas
+        max_chars=1400  overlap=150
+        seção inferida do primeiro título"]
+
+        EMBED["5  embed.py  BedrockEmbedder
+        Amazon Titan Embeddings v2
+        InvokeModel por chunk
+        → vector(1024)  L2 normalizado"]
+
+        STORE["6  store.py  PgVectorStore
+        UPSERT ON CONFLICT (id) DO UPDATE
+        idempotente por chunk_id SHA-1
+        atualiza documents.status = done"]
+
+        DL --> MANIFEST --> EXTRACT --> CHUNK --> EMBED --> STORE
+    end
+
+    subgraph PGVECTOR["RDS PostgreSQL + pgvector"]
+        DOCS["tabela: documents
+        id  filename  s3_key
+        indexed_pages  status  indexed_at"]
+        CHUNKS["tabela: chunks
+        id  document_id  page  section
+        text  embedding vector(1024)"]
+        HNSW["índice HNSW
+        embedding vector_cosine_ops
+        m=16  ef_construction=64"]
+
+        DOCS -->|"1:N"| CHUNKS
+        CHUNKS --- HNSW
+    end
+
+    subgraph CW["CloudWatch"]
+        METRICS["Métricas do job
+        chunks_indexed  pages_processed
+        duration_seconds  errors"]
+    end
+
+    S3 -->|"S3 Event"| SQS
+    SQS --> TRIGGER
+    TRIGGER --> JOB
+    DL -.->|"s3:GetObject"| S3
+    STORE --> DOCS
+    STORE --> CHUNKS
+    STORE -.->|"PutMetricData"| METRICS

@@ -1,0 +1,87 @@
+flowchart TD
+    DEV["Desenvolvedor
+    git push / PR"]
+
+    subgraph GH["GitHub"]
+        PR["Pull Request
+        branch feature/*"]
+        MERGE["Merge para main"]
+    end
+
+    subgraph CI["CI — GitHub Actions  on: pull_request"]
+        LINT["Lint + Type Check
+        eslint  mypy  ruff"]
+        TEST["Testes Unitários
+        jest  pytest"]
+        BUILD_CHECK["Docker Build
+        build sem push
+        valida Dockerfiles"]
+
+        LINT --> TEST --> BUILD_CHECK
+    end
+
+    subgraph CD_BUILD["CD — Build  on: push to main"]
+        BUILD_FE["docker build frontend
+        tag: ecr/.../frontend:sha"]
+        BUILD_BE["docker build backend-api
+        tag: ecr/.../backend-api:sha"]
+        BUILD_ING["docker build ingest-job
+        tag: ecr/.../ingest-job:sha"]
+        PUSH["Push para ECR
+        :sha  +  :latest"]
+
+        BUILD_FE & BUILD_BE & BUILD_ING --> PUSH
+    end
+
+    subgraph CD_DEPLOY["CD — Deploy"]
+        STG["Deploy Staging
+        helm upgrade iesb-staging
+        namespace: iesb-staging
+        rollout automático"]
+        SMOKE["Smoke Tests
+        curl /api/health
+        POST /api/chat  mensagem de teste"]
+        GATE["Aprovação Manual
+        (opcional para prod)"]
+        PRD["Deploy Produção
+        helm upgrade iesb-prod
+        namespace: iesb-prod
+        rollingUpdate: maxUnavailable=0"]
+        INGEST_CHECK{"PDFs mudaram
+        no PR?"}
+        INGEST_JOB["Trigger Ingest Job
+        kubectl create job
+        --from=cronjob/ingest-job
+        namespace: iesb-jobs"]
+        ROLLBACK["Rollback Automático
+        kubectl rollout undo
+        se readiness probe falhar"]
+
+        STG --> SMOKE
+        SMOKE -->|"ok"| GATE
+        GATE -->|"aprovado"| PRD
+        PRD --> INGEST_CHECK
+        INGEST_CHECK -->|"sim"| INGEST_JOB
+        INGEST_CHECK -->|"não"| DONE_INGEST["fim"]
+        PRD -->|"falha"| ROLLBACK
+    end
+
+    subgraph INFRA["Infraestrutura"]
+        ECR_R["Amazon ECR"]
+        EKS_STG["EKS  iesb-staging"]
+        EKS_PRD["EKS  iesb-prod"]
+        CW_ALERT["CloudWatch Alarm
+        erro 5xx > 1%
+        latência p95 > 5s"]
+    end
+
+    DEV --> PR
+    PR --> CI
+    PR -->|"merge aprovado"| MERGE
+    MERGE --> CD_BUILD
+    CD_BUILD --> ECR_R
+    ECR_R --> CD_DEPLOY
+    STG --> EKS_STG
+    PRD --> EKS_PRD
+    EKS_PRD --> CW_ALERT
+    CW_ALERT -.->|"alerta"| ROLLBACK

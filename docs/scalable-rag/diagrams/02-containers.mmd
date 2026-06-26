@@ -1,0 +1,61 @@
+flowchart LR
+    BROWSER["Navegador
+    Aluno IESB"]
+
+    subgraph EKS["Amazon EKS — iesb-prod"]
+        direction TB
+
+        subgraph FE_GROUP["Deployment: frontend"]
+            FE["Next.js 15
+            Node 22  porta 3000
+            Chat UI + proxy /api/chat
+            replicas: 2–10 (HPA)"]
+        end
+
+        subgraph BE_GROUP["Deployment: backend-api"]
+            BE["Google ADK  adk web
+            Python 3.13  porta 8000
+            LlmAgent assistente_iesb
+            buscar_nos_guias tool
+            replicas: 2–10 (HPA)"]
+        end
+
+        subgraph JOB_GROUP["CronJob: ingest-job  iesb-jobs"]
+            PIPE["Python 3.13
+            manifest → extract → chunk
+            embed → PgVectorStore UPSERT"]
+        end
+    end
+
+    subgraph DATA["Persistência"]
+        direction TB
+        PG["RDS PostgreSQL 16
+        extensão pgvector
+        tabelas: documents, chunks, sessions
+        índice HNSW em embedding vector(1024)"]
+        S3["S3  iesb-corpus
+        PDFs originais
+        s3://iesb-corpus/pdfs/"]
+    end
+
+    subgraph BEDROCK["AWS Bedrock  us-east-1"]
+        direction LR
+        CLAUDE["Claude Haiku 4.5
+        Geração de respostas"]
+        TITAN["Titan Embeddings v2
+        1024 dims  L2 normalizado"]
+    end
+
+    ALB["ALB
+    HTTPS 443
+    AWS Load Balancer Controller"]
+
+    BROWSER -->|"HTTPS"| ALB
+    ALB -->|"/"| FE
+    FE -->|"POST /run  ClusterIP"| BE
+    BE -->|"SELECT  cosine  LIMIT 4"| PG
+    BE -->|"Messages API"| CLAUDE
+    BE -->|"InvokeModel query"| TITAN
+    PIPE -->|"GET s3://iesb-corpus/pdfs/"| S3
+    PIPE -->|"UPSERT chunks"| PG
+    PIPE -->|"InvokeModel chunks"| TITAN

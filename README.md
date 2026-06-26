@@ -29,6 +29,8 @@ implantável na AWS.
 
 ### Pipeline de ingestao (build-time)
 
+Fonte Mermaid: [`docs/ingest-pipeline.mmd`](docs/ingest-pipeline.mmd)
+
 Executado uma vez, fora da imagem Docker, sempre que os PDFs mudarem.
 
 ```
@@ -71,6 +73,8 @@ index/
 ```
 
 ### Fluxo de consulta (runtime)
+
+Fonte Mermaid: [`docs/runtime-query-flow.mmd`](docs/runtime-query-flow.mmd)
 
 ```
 Navegador
@@ -131,6 +135,10 @@ Navegador
 |-- requirements.txt         dependencias Python (runtime)
 |-- pyproject.toml           metadados e dependencias do projeto
 |-- uv.lock                  lockfile reproduzivel (uv)
+|
+|-- docs/                    diagramas Mermaid das arquiteturas
+|   |-- ingest-pipeline.mmd  pipeline de ingestao (build-time)
+|   \-- runtime-query-flow.mmd  fluxo de consulta (runtime)
 |
 |-- pdfs/                    PDFs de origem (fonte da verdade do corpus)
 |-- index/                   saida do pipeline de ingestao
