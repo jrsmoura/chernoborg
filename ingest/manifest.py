@@ -19,9 +19,8 @@ import unicodedata
 
 # Faixas de páginas (inclusivas, 1-based) consideradas conteúdo útil.
 KEEP_RANGES: dict[str, list[tuple[int, int]]] = {
-    "Guia_da_Extensao_Curricular.pdf": [(11, 36)],
     "Guia_de_Atividades_Complementares_Atualizado_10_02_2026.pdf": [(2, 22)],
-    "Guia de Curricularização da Extensão_vf.pdf": [(10, 45)],
+    "Guia_de_Curricularização_da_Extensao_vf.pdf": [(10, 49)],
 }
 
 # Padrões típicos das páginas de planner/diário e formulários em branco.
