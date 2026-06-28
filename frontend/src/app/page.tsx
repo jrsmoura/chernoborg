@@ -136,7 +136,7 @@ export default function ChatPage() {
             ref={textareaRef}
             id="chat-input"
             rows={1}
-            placeholder="Escreva sua dúvida… (Enter para enviar)"
+            placeholder="Escreva sua dúvida… (Enter para enviar, Shift+Enter para nova linha)"
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={onKeyDown}
@@ -151,6 +151,7 @@ export default function ChatPage() {
         <p className="footer-note">
           Respostas baseadas nos guias oficiais do IESB. Dúvidas não cobertas:{' '}
           <a href="mailto:ativ.complementar@iesb.br">ativ.complementar@iesb.br</a>
+          <p className="version" style={{ color: 'red' }}>versão:alpha-0.1.3</p>
         </p>
       </footer>
 

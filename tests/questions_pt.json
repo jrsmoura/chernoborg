@@ -1,0 +1,192 @@
+[
+  {
+    "id": "AC-01",
+    "pergunta": "O que são atividades complementares?",
+    "keywords": ["atividades complementares", "práticos", "profissão", "primeiro semestre"]
+  },
+  {
+    "id": "AC-02",
+    "pergunta": "Como faço para comprovar uma atividade complementar externa?",
+    "keywords": ["Aluno Online", "Requerimento", "documento", "comprobatório"]
+  },
+  {
+    "id": "AC-03",
+    "pergunta": "Quanto tempo leva para minha atividade complementar ser validada?",
+    "keywords": ["30 dias úteis", "validação", "lançamento"]
+  },
+  {
+    "id": "AC-04",
+    "pergunta": "Quais são os grupos de atividades complementares do IESB?",
+    "keywords": ["quatro grupos", "Grupo I", "Grupo II", "Grupo III", "Grupo IV"]
+  },
+  {
+    "id": "AC-05",
+    "pergunta": "Quais atividades fazem parte do Grupo I de atividades complementares?",
+    "keywords": ["cursos de extensão", "palestras", "eventos", "congressos"]
+  },
+  {
+    "id": "AC-06",
+    "pergunta": "Quais atividades fazem parte do Grupo II de atividades complementares?",
+    "keywords": ["artigo científico", "publicação", "iniciação científica"]
+  },
+  {
+    "id": "AC-07",
+    "pergunta": "O que são as atividades do Grupo III de atividades complementares?",
+    "keywords": ["voluntário", "social", "humanísticas", "UNESCO"]
+  },
+  {
+    "id": "AC-08",
+    "pergunta": "O que são as atividades do Grupo IV de atividades complementares?",
+    "keywords": ["monitoria", "estágio", "vivência profissional", "Grupo IV"]
+  },
+  {
+    "id": "AC-09",
+    "pergunta": "Quantas horas valem por produção de artigo científico individual?",
+    "keywords": ["20 horas", "artigo", "individual"]
+  },
+  {
+    "id": "AC-10",
+    "pergunta": "Qual a carga horária máxima que posso validar por participação em congressos e palestras?",
+    "keywords": ["30 horas", "evento", "certificado"]
+  },
+  {
+    "id": "AC-11",
+    "pergunta": "Quais são as responsabilidades dos estudantes em relação às atividades complementares?",
+    "keywords": ["comparecer", "comprovantes", "Aluno Online", "responsabilidades"]
+  },
+  {
+    "id": "AC-12",
+    "pergunta": "Qual o tamanho máximo do arquivo para envio de atividade complementar no Aluno Online?",
+    "keywords": ["2MB", "arquivo", "redução"]
+  },
+  {
+    "id": "AC-13",
+    "pergunta": "Até quando devo entregar as atividades complementares?",
+    "keywords": ["calendário acadêmico", "prazo", "entrega"]
+  },
+  {
+    "id": "AC-14",
+    "pergunta": "Sou formando, qual o prazo para minhas atividades complementares?",
+    "keywords": ["formandos", "último dia", "período letivo", "colação"]
+  },
+  {
+    "id": "AC-15",
+    "pergunta": "Passo a passo: como enviar minha atividade complementar no Aluno Online?",
+    "keywords": ["Aluno Online", "matrícula", "Serviços Acadêmicos", "solicitação"]
+  },
+  {
+    "id": "AC-16",
+    "pergunta": "Entrei no IESB por transferência. Posso validar atividades da minha instituição anterior?",
+    "keywords": ["transferência", "IES de origem", "validar", "transferidos"]
+  },
+  {
+    "id": "AC-17",
+    "pergunta": "Como verificar se minha solicitação de atividade complementar foi deferida ou indeferida?",
+    "keywords": ["Aluno Online", "indeferida", "verificar", "solicitação"]
+  },
+  {
+    "id": "AC-18",
+    "pergunta": "Onde encontro os registros das minhas atividades complementares validadas?",
+    "keywords": ["Aluno Online", "Atividades Concluídas", "carga horária", "registros"]
+  },
+  {
+    "id": "EXT-01",
+    "pergunta": "O que é a extensão curricularizada?",
+    "keywords": ["extensão curricularizada", "currículo", "obrigatórias", "carga horária"]
+  },
+  {
+    "id": "EXT-02",
+    "pergunta": "Qual resolução do MEC regulamenta a extensão curricularizada?",
+    "keywords": ["Resolução", "7/2018", "MEC", "10%"]
+  },
+  {
+    "id": "EXT-03",
+    "pergunta": "Qual percentual mínimo da carga horária do curso deve ser dedicado à extensão?",
+    "keywords": ["10%", "mínimo", "carga horária", "extensão"]
+  },
+  {
+    "id": "EXT-04",
+    "pergunta": "O que são os ODS?",
+    "keywords": ["Objetivos de Desenvolvimento Sustentável", "ONU", "17", "Agenda 2030"]
+  },
+  {
+    "id": "EXT-05",
+    "pergunta": "Quantos ODS existem e o que é a Agenda 2030?",
+    "keywords": ["17", "Agenda 2030", "Estados-membros", "2015"]
+  },
+  {
+    "id": "EXT-06",
+    "pergunta": "Quais são as trilhas de aprendizagem disponíveis na extensão do IESB?",
+    "keywords": ["Comunitária", "Empreendedorismo", "Inovação", "Pesquisa"]
+  },
+  {
+    "id": "EXT-07",
+    "pergunta": "O que é a Trilha Comunitária?",
+    "keywords": ["Comunitária", "social", "inclusão", "comunidades", "voluntárias"]
+  },
+  {
+    "id": "EXT-08",
+    "pergunta": "O que é a Trilha de Empreendedorismo?",
+    "keywords": ["Empreendedorismo", "inovadoras", "startups", "negócios"]
+  },
+  {
+    "id": "EXT-09",
+    "pergunta": "Qual é o objetivo geral da disciplina de extensão?",
+    "keywords": ["objetivo", "extensão universitária", "ODS", "projetos", "social"]
+  },
+  {
+    "id": "EXT-10",
+    "pergunta": "O que é o tema norteador da extensão curricularizada?",
+    "keywords": ["tema norteador", "semestre", "Núcleo Estruturante", "ODS"]
+  },
+  {
+    "id": "EXT-11",
+    "pergunta": "O que é o Blackboard e para que serve na disciplina de extensão?",
+    "keywords": ["Blackboard", "plataforma", "AVA", "IESB"]
+  },
+  {
+    "id": "EXT-12",
+    "pergunta": "O que é a DreamShaper?",
+    "keywords": ["DreamShaper", "plataforma", "projeto", "interativa"]
+  },
+  {
+    "id": "EXT-13",
+    "pergunta": "Como funciona a avaliação P1 da disciplina de extensão?",
+    "keywords": ["P1", "projeto", "vídeo pitch", "DreamShaper", "avaliados"]
+  },
+  {
+    "id": "EXT-14",
+    "pergunta": "O que é o Vídeo Pitch e qual a duração máxima?",
+    "keywords": ["Vídeo Pitch", "3 minutos", "proposta", "relevância social"]
+  },
+  {
+    "id": "EXT-15",
+    "pergunta": "O que é a PS da disciplina de extensão e como ela substitui a P1?",
+    "keywords": ["PS", "P1", "substitui", "relatório analítico", "média"]
+  },
+  {
+    "id": "EXT-16",
+    "pergunta": "O que é o relatório analítico e quando devo entregá-lo?",
+    "keywords": ["relatório analítico", "projeto", "tema norteador", "ABNT"]
+  },
+  {
+    "id": "EXT-17",
+    "pergunta": "Sou obrigado a fazer a disciplina de extensão?",
+    "keywords": ["obrigatória", "Resolução", "7/2018", "MEC", "10%"]
+  },
+  {
+    "id": "EXT-18",
+    "pergunta": "Como sei em qual trilha fui alocado se não escolhi a tempo?",
+    "keywords": ["e-mail", "alocado", "prazo", "trilha", "automaticamente"]
+  },
+  {
+    "id": "EXT-19",
+    "pergunta": "Posso alterar a minha trilha de extensão depois de alocado?",
+    "keywords": ["alterar", "trilha", "prazo", "calendário"]
+  },
+  {
+    "id": "EXT-20",
+    "pergunta": "Como verifico se estou matriculado na disciplina de extensão?",
+    "keywords": ["Aluno Online", "matriculado", "disciplinas", "portal"]
+  }
+]

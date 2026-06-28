@@ -1,15 +1,12 @@
 """Seleção de páginas: o que entra no índice e o que é descartado.
 
-Os PDFs do IESB são infográficos com muito ruído para um RAG:
-- O "Guia de Extensão" tem 72 páginas, mas 37-72 são um *planner* em branco
-  (calendários, "Top 5 Songs", páginas de diário) e 1-10 são capa, sumário,
-  listas de coordenadores (que saem embaralhadas na extração) e créditos.
-- O "Guia de Atividades Complementares" tem capa (p1) e anexos em branco
-  (p23-24, formulários só com linhas).
+Indexa os arquivos inteiros e delega a filtragem à heurística ``looks_like_filler``:
+- Páginas com menos de 100 caracteres úteis (só cabeçalho + número de página)
+- Formulários em branco dominados por underscores (RELATÓRIO INDIVIDUAL)
+- Páginas de planner/diário identificadas por padrões textuais
 
-Indexar isso degrada a recuperação. A seleção abaixo é curada à mão porque o
-corpus é pequeno e fixo; ``looks_like_filler`` é uma rede de segurança
-heurística para qualquer reprocessamento futuro.
+O ``min_chars`` foi ajustado para 100 para capturar páginas que contêm apenas
+o cabeçalho do guia + número de página (74 chars), que não acrescentam conteúdo.
 """
 
 from __future__ import annotations
@@ -17,10 +14,11 @@ from __future__ import annotations
 import re
 import unicodedata
 
-# Faixas de páginas (inclusivas, 1-based) consideradas conteúdo útil.
+# Faixas de páginas (inclusivas, 1-based) — abrange o arquivo inteiro.
+# A filtragem fina é feita por looks_like_filler.
 KEEP_RANGES: dict[str, list[tuple[int, int]]] = {
-    "Guia_de_Atividades_Complementares_Atualizado_10_02_2026.pdf": [(2, 22)],
-    "Guia_de_Curricularização_da_Extensao_vf.pdf": [(10, 49)],
+    "Guia_de_Atividades_Complementares_Atualizado_10_02_2026.pdf": [(1, 24)],
+    "Guia_de_Curricularização_da_Extensao_vf.pdf": [(1, 49)],
 }
 
 # Padrões típicos das páginas de planner/diário e formulários em branco.
@@ -42,7 +40,7 @@ def is_kept(source: str, page: int) -> bool:
     return any(lo <= page <= hi for lo, hi in KEEP_RANGES.get(key, []))
 
 
-def looks_like_filler(text: str, *, min_chars: int = 60) -> bool:
+def looks_like_filler(text: str, *, min_chars: int = 100) -> bool:
     """Heurística: página de planner, formulário em branco ou quase vazia."""
     stripped = text.strip()
     if len(stripped) < min_chars:
